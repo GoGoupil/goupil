@@ -2,11 +2,8 @@ package main
 
 import "fmt"
 
-type Runner interface {
-	Run([]string)
-}
-
 type Command struct {
+	Run func([]string)
 	Usage     string
 	ShortDesc string
 	LongDesc  string

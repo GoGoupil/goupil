@@ -2,13 +2,17 @@ package main
 
 import "fmt"
 
-var helpCommand = Command{
+var helpCommand = &Command{
 	Usage:     "help [command]",
 	ShortDesc: "Display help message",
 	LongDesc:  `If command is passed, the output will display how to use the passed command.`,
 }
 
-func (command *Command) Run(args []string) {
+func init() {
+	helpCommand.Run = help
+}
+
+func help(args []string) {
 	if len(args) == 0 {
 		fmt.Println("Goupil is a web load testing tool designed in Go")
 		fmt.Println("Here is the list of available commands")

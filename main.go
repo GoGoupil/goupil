@@ -5,8 +5,9 @@ import (
 	"os"
 )
 
-var commands = map[string]Command{
+var commands = map[string]*Command{
 	"help": helpCommand,
+	"run": runCommand,
 }
 
 func main() {
