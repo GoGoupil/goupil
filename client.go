@@ -1,8 +1,8 @@
 package http
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 )
 
 type Client struct {
@@ -14,6 +14,6 @@ func (c *Client) Get(route string) int {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	return result.StatusCode
 }
