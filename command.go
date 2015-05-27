@@ -7,9 +7,9 @@ type Runner interface {
 }
 
 type Command struct {
-	Usage string
+	Usage     string
 	ShortDesc string
-	LongDesc string
+	LongDesc  string
 }
 
 func (command Command) String() string {

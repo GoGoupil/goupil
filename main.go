@@ -5,13 +5,13 @@ import (
 	"os"
 )
 
-var commands = map[string]Command {
+var commands = map[string]Command{
 	"help": helpCommand,
 }
 
 func main() {
 	args := os.Args[1:]
-	
+
 	if len(args) > 0 {
 		if command, ok := commands[args[0]]; ok {
 			command.Run(args[1:])
