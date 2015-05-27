@@ -5,33 +5,17 @@ import (
 	"os"
 )
 
-type Command struct {
-	Name string
-	Usage string
-	ShortDesc string
-	LongDesc string
-}
-
-func (command Command) String() string {
-	return fmt.Sprintf(`Usage: %s
-
-%s
-
-%s`, command.Usage, command.ShortDesc, command.LongDesc)
-}
-
-var commands = []Command{
-	helpCommand,
+var commands = map[string]Command {
+	"help": helpCommand,
 }
 
 func main() {
 	args := os.Args[1:]
 	
 	if len(args) > 0 {
-		switch args[0] {
-		case "help":
-			helpCommand.List(commands)
-		default:
+		if command, ok := commands[args[0]]; ok {
+			command.Run(args[1:])
+		} else {
 			fmt.Println("Unexpected command given. Use help command to display command list.")
 		}
 	} else {
