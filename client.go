@@ -14,6 +14,7 @@ func (c *Client) Get(route string) int {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer result.Body.Close()
 
 	return result.StatusCode
 }
