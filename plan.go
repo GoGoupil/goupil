@@ -6,6 +6,7 @@ import (
 	"github.com/GoGoupil/http"
 	"io/ioutil"
 	"log"
+	"sync"
 )
 
 type Plan struct {
@@ -35,7 +36,17 @@ func (p *Plan) Run() {
 		BaseURL: p.BaseURL,
 	}
 
+	wg := sync.WaitGroup{}
+
 	for _, thread := range p.Threads {
-		thread.Run(client)
+		wg.Add(1)
+		go func(thread Thread) {
+			defer wg.Done()
+			thread.Run(client)
+		}(thread)
 	}
+
+	wg.Wait()
+
+	fmt.Println("Plan execution is terminated.")
 }

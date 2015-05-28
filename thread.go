@@ -12,8 +12,8 @@ type Thread struct {
 }
 
 func (t *Thread) Run(c http.Client) {
-	fmt.Printf("Launch %d instances requesting route %s...\n", t.Count, t.Route)
-	defer fmt.Println("Plan execution finished...")
+	fmt.Printf("Launch %d threads requesting route %s...\n", t.Count, t.Route)
+	defer fmt.Printf("Threads for route %s are done...\n", t.Route)
 
 	waitGroup := sync.WaitGroup{}
 
