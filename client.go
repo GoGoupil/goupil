@@ -6,7 +6,7 @@ import (
 )
 
 type Client struct {
-	baseURL string
+	BaseURL string
 }
 
 func (c *Client) Get(route string) int {

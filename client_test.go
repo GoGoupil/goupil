@@ -7,7 +7,7 @@ import (
 
 func TestReturnCode(t *testing.T) {
 	var client = Client{
-		baseURL: "http://www.google.fr",
+		BaseURL: "http://www.google.fr",
 	}
 
 	code := client.Get("/")
