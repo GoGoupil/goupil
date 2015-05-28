@@ -7,13 +7,14 @@ import (
 )
 
 type Thread struct {
-	Count int
-	Route string
+	Count     int
+	Route     string
+	ErrorRate float64
 }
 
 func (t *Thread) Run(c http.Client) {
 	fmt.Printf("Launch %d threads requesting route %s...\n", t.Count, t.Route)
-	defer fmt.Printf("Threads for route %s are done...\n", t.Route)
+	defer t.ComputeResult()
 
 	waitGroup := sync.WaitGroup{}
 
@@ -21,9 +22,18 @@ func (t *Thread) Run(c http.Client) {
 		waitGroup.Add(1)
 		go func() {
 			defer waitGroup.Done()
-			c.Get(t.Route)
+			code := c.Get(t.Route)
+
+			if code != 200 {
+				t.ErrorRate++
+			}
 		}()
 	}
 
 	waitGroup.Wait()
+}
+
+func (t *Thread) ComputeResult() {
+	fmt.Printf("Threads for route %s are done. Calculating results...\n", t.Route)
+	t.ErrorRate = (t.ErrorRate * 100) / float64(t.Count)
 }
