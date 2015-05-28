@@ -10,7 +10,7 @@ type Client struct {
 }
 
 func (c *Client) Get(route string) int {
-	result, err := http.Get(c.baseURL + route)
+	result, err := http.Get(c.BaseURL + route)
 	if err != nil {
 		log.Fatal(err)
 	}
