@@ -3,10 +3,11 @@ package main
 import "fmt"
 
 type Command struct {
-	Run func([]string)
+	Run       func([]string)
 	Usage     string
 	ShortDesc string
 	LongDesc  string
+	MinArgs   int
 }
 
 func (command Command) String() string {
