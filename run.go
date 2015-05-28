@@ -1,14 +1,14 @@
 package main
 
-import "github.com/GoGoupil/http"
-
-var runCommand = &Command {
-	Usage: "run",
+var runCommand = &Command{
+	Usage:     "run",
 	ShortDesc: "Run goupil",
-	LongDesc: "TODO",
-	Run: run,
+	LongDesc:  "TODO",
+	MinArgs:   1,
+	Run:       run,
 }
 
 func run(args []string) {
-	
+	var plan = Plan{}
+	plan.Load(args[0])
 }
