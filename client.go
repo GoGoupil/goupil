@@ -1,20 +1,36 @@
 package http
 
 import (
-	"log"
-	"net/http"
+	"net"
+	"fmt"
+	"io/ioutil"
 )
 
 type Client struct {
-	BaseURL string
+	Socket *net.Conn
 }
 
-func (c *Client) Get(route string) int {
-	result, err := http.Get(c.BaseURL + route)
+func (c *Client) Open(host string, port int) {
+	socket, err := net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	defer result.Body.Close()
+	
+	c.Socket = &socket
+}
 
-	return result.StatusCode
+func (c *Client) Get(route string) {
+	if c.Socket == nil {
+		panic("Socket not opened")
+	}
+	
+	(*c.Socket).Write([]byte(fmt.Sprintf("GET %s HTTP/1.0\r\n\r\n")))
+	_, err := ioutil.ReadAll(*c.Socket)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (c *Client) Close() {
+	(*c.Socket).Close()
 }
