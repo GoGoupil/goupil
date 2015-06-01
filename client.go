@@ -1,13 +1,20 @@
 package http
 
 import (
-	"net"
+	"bufio"
 	"fmt"
-	"io/ioutil"
+	"net"
+	"net/http"
+	"net/http/httputil"
+	"regexp"
+	"strconv"
+	"time"
 )
 
 type Client struct {
 	Socket *net.Conn
+	Host   string
+	Port   int
 }
 
 func (c *Client) Open(host string, port int) {
@@ -15,20 +22,52 @@ func (c *Client) Open(host string, port int) {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	c.Socket = &socket
+	c.Host = host
+	c.Port = port
 }
 
-func (c *Client) Get(route string) {
+func (c *Client) Get(route string) (float64, int) {
 	if c.Socket == nil {
 		panic("Socket not opened")
 	}
-	
-	(*c.Socket).Write([]byte(fmt.Sprintf("GET %s HTTP/1.0\r\n\r\n")))
-	_, err := ioutil.ReadAll(*c.Socket)
+
+	// Prepare HTTP request.
+	req, err := http.NewRequest("GET", fmt.Sprintf("http://%s%s", c.Host, route), nil)
 	if err != nil {
 		panic(err)
 	}
+	dump, err := httputil.DumpRequest(req, false)
+	if err != nil {
+		panic(err)
+	}
+
+	// Write/Read HTTP request/response.
+	start := time.Now()
+	fmt.Fprintf((*c.Socket), string(dump))
+	reader := bufio.NewReader((*c.Socket))
+	status, err := reader.ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	for ; err != nil; _, err = reader.ReadByte() {
+		// Read whole response.
+	}
+	elapsed := time.Since(start).Seconds() * 1000
+
+	// Parse code.
+	re := regexp.MustCompile("HTTP/1.[0-1] ([0-9]{3}).*")
+	submatches := re.FindStringSubmatch(status)
+	if len(submatches) == 0 {
+		panic("Can't find HTTP response code")
+	}
+	code, err := strconv.Atoi(submatches[1])
+	if err != nil {
+		panic(err)
+	}
+
+	return elapsed, code
 }
 
 func (c *Client) Close() {
