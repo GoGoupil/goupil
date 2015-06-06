@@ -13,10 +13,10 @@ This is a JSON plan description example.
             "Count": 10,
             "Route": "/"
         },
-	{
-	    "Count": 10,
-	    "Route": "/test"
-	}
+		{
+		    "Count": 10,
+		    "Route": "/test"
+		}
     ]
 }
 ```
