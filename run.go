@@ -3,7 +3,7 @@ package main
 var runCommand = &Command{
 	Usage:     "run plan.json",
 	ShortDesc: "Execute given plan",
-	LongDesc:  `The plan parameter is a JSON filed describing the plan to execute.
+	LongDesc: `The plan parameter is a JSON filed describing the plan to execute.
 Here is an example of plan description file.
 You can check Plan structure defined in plan.go or check our GitHub to have more details :)
 
@@ -21,8 +21,8 @@ You can check Plan structure defined in plan.go or check our GitHub to have more
 		}
 	]
 }`,
-	MinArgs:   1,
-	Run:       run,
+	MinArgs: 1,
+	Run:     run,
 }
 
 func run(args []string) {

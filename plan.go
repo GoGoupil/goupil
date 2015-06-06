@@ -3,15 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/GoGoupil/http"
 	"io/ioutil"
 	"log"
 	"sync"
 )
 
 type Plan struct {
-	Name    string
-	BaseURL string
+	Host    string
+	Port    int
 	Threads []*Thread
 }
 
@@ -30,34 +29,29 @@ func (p *Plan) Load(path string) {
 }
 
 func (p *Plan) Run() {
-	fmt.Printf("Running %s plan...\n", p.Name)
-	defer p.DisplayResult()
-
-	client := http.Client{
-		BaseURL: p.BaseURL,
-	}
-
+	fmt.Printf("Running plan on %s:%d\n", p.Host, p.Port)
 	wg := sync.WaitGroup{}
-
 	for _, thread := range p.Threads {
 		wg.Add(1)
-		go func(thread *Thread) {
+		go func(t *Thread) {
 			defer wg.Done()
-			thread.Run(client)
+			fmt.Printf("Running %d threads on route %s\n", t.Count, t.Route)
+			t.Run(p.Host, p.Port)
 		}(thread)
 	}
-
 	wg.Wait()
+	fmt.Printf("Ending plan, computing results\n")
+	p.DisplayResult()
 }
 
 func (p *Plan) DisplayResult() {
-	fmt.Println("Plan execution is terminated. Displaying results...\n")
-
+	fmt.Println()
+	fmt.Printf("Results:\n")
 	for _, thread := range p.Threads {
-		fmt.Printf("Results for route %s:\n", thread.Route)
-		fmt.Printf("---------------------\n")
+		fmt.Printf("---------------------------------------\n")
+		fmt.Printf("Route: %s\n", thread.Route)
+		fmt.Printf("Average time: %fms\n", thread.AverageTime)
 		fmt.Printf("Error rate: %f%%\n", thread.ErrorRate)
-		fmt.Printf("Average time: %fs\n", thread.AverageTime)
-		fmt.Printf("\n")
 	}
+	fmt.Println()
 }
