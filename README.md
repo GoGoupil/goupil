@@ -10,7 +10,9 @@ The client take a base URL completed with a route when requesting and return HTT
 import "github.com/GoGoupil/http"
 
 func main() {
-  c := Client{"http://www.google.com"}
-  code := c.Get("/")
+    c := http.Client{}
+    c.Open("devatoria.info", 80)
+    c.Get("/")
+    c.Close()
 }
 ```
