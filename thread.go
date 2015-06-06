@@ -20,6 +20,7 @@ func (t *Thread) Run(host string, port int) {
 			defer wg.Done()
 			c := http.Client{}
 			c.Open(host, port)
+			defer c.Close()
 			elapsed, code := c.Get(t.Route)
 			t.AverageTime += elapsed
 			if code != 200 {
