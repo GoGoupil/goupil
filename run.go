@@ -8,15 +8,15 @@ Here is an example of plan description file.
 You can check Plan structure defined in plan.go or check our GitHub to have more details :)
 
 {
-	"Name": "test",
-	"BaseURL": "http://www.google.com",
+	"Host": "devatoria.info",
+	"Port": 80,
 	"Threads": [
 		{
-			"Count": 10,
+			"Count": 30,
 			"Route": "/"
 		},
 		{
-			"Count": 10,
+			"Count": 30,
 			"Route": "/test"
 		}
 	]
