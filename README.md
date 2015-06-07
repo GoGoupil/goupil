@@ -7,12 +7,17 @@ The client take a base URL completed with a route when requesting and return HTT
 ## Usage
 
 ```go
-import "github.com/GoGoupil/http"
+import (
+    "fmt"
+    "github.com/GoGoupil/http"
+)
 
 func main() {
     c := http.Client{}
     c.Open("devatoria.info", 80)
-    c.Get("/")
-    c.Close()
+    defer c.Close()
+    elapsed, code := c.Get("/")
+    fmt.Printf("Elapsed: %f\n", elapsed)
+    fmt.Printf("HTTP code: %d\n", code)
 }
 ```
