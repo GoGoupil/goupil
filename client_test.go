@@ -6,21 +6,33 @@ import (
 	"testing"
 )
 
+type AverageResults struct {
+	AverageSendingTime           float64
+	AverageReadingFirstBytesTime float64
+	AverageReadingTotalTime      float64
+	AverageTotalTime             float64
+}
+
 func TestReturnCode(t *testing.T) {
 	socketCount := 100
 	socketHost := "devatoria.info"
 	socketPort := 80
 	remainingSockets := 0
 	clients := make([]Client, socketCount)
-	var totalElapsed float64
+	averageResults := AverageResults{}
 	var totalError int
 	wg := sync.WaitGroup{}
 
 	for i, _ := range clients {
-		clients[i].Open(socketHost, socketPort)
-		remainingSockets++
-		log.Printf("%d sockets opened...\n", remainingSockets)
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			clients[i].Open(socketHost, socketPort)
+			remainingSockets++
+			log.Printf("%d sockets opened...\n", remainingSockets)
+		}(i)
 	}
+	wg.Wait()
 
 	log.Printf("Opened %d sockets on %s:%d\n", socketCount, socketHost, socketPort)
 
@@ -32,8 +44,11 @@ func TestReturnCode(t *testing.T) {
 				remainingSockets--
 				log.Printf("%d sockets remaining...\n", remainingSockets)
 			}()
-			elapsed, code := clients[i].Get("/")
-			totalElapsed += elapsed
+			results, code := clients[i].Get("/")
+			averageResults.AverageSendingTime += results.TimeSending
+			averageResults.AverageReadingFirstBytesTime += results.TimeReadingFirstBytes
+			averageResults.AverageReadingTotalTime += results.TimeReadingTotal
+			averageResults.AverageTotalTime += results.TimeTotal
 			if code != 200 {
 				totalError++
 				log.Println(code)
@@ -47,6 +62,14 @@ func TestReturnCode(t *testing.T) {
 		clients[i].Close()
 	}
 
-	log.Printf("Elapsed: %fms\n", totalElapsed/float64(socketCount))
+	averageResults.AverageSendingTime /= float64(socketCount)
+	averageResults.AverageReadingFirstBytesTime /= float64(socketCount)
+	averageResults.AverageReadingTotalTime /= float64(socketCount)
+	averageResults.AverageTotalTime /= float64(socketCount)
+
+	log.Printf("Average sending time: %fms\n", averageResults.AverageSendingTime)
+	log.Printf("Average receiving first bytes time: %fms\n", averageResults.AverageReadingFirstBytesTime)
+	log.Printf("Average receiving total time: %fms\n", averageResults.AverageReadingTotalTime)
+	log.Printf("Average total time: %fms\n", averageResults.AverageTotalTime)
 	log.Printf("Error percentile: %f%%\n", float64((totalError/socketCount)*100))
 }
