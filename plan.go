@@ -50,7 +50,10 @@ func (p *Plan) DisplayResult() {
 	for _, thread := range p.Threads {
 		fmt.Printf("---------------------------------------\n")
 		fmt.Printf("Route: %s\n", thread.Route)
-		fmt.Printf("Average time: %fms\n", thread.AverageTime)
+		fmt.Printf("Average sending time: %fms\n", thread.Results.AverageSendingTime)
+		fmt.Printf("Average reading first bytes time: %fms\n", thread.Results.AverageReadingFirstBytesTime)
+		fmt.Printf("Average reading total time: %fms\n", thread.Results.AverageReadingTotalTime)
+		fmt.Printf("Average total time: %fms\n", thread.Results.AverageTotalTime)
 		fmt.Printf("Error rate: %f%%\n", thread.ErrorRate)
 	}
 	fmt.Println()
