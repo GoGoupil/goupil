@@ -75,8 +75,17 @@ func (c *Client) Get(route string) (Result, int) {
 		}
 	}
 	results.TimeReadingFirstBytes = time.Since(startReading).Seconds() * 1000
-	for ; err != nil; _, err = reader.ReadByte() {
-		// Read whole response.
+	if val, ok := headers["Content-Length"]; ok {
+		contentLength, err := strconv.Atoi(val)
+		if err != nil {
+			panic(err)
+		}
+		for i := 0; i < contentLength; i++ {
+			_, err = reader.ReadByte()
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
 	results.TimeReadingTotal = time.Since(startReading).Seconds() * 1000
 	results.TimeTotal = time.Since(startSending).Seconds() * 1000
