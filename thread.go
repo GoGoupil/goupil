@@ -35,21 +35,31 @@ func (ar *AverageResults) Compute(count int) {
 
 func (t *Thread) Run(host string, port int) {
 	wg := sync.WaitGroup{}
-	for i := 0; i < t.Count; i++ {
+	clients := make([]http.Client, t.Count)
+
+	for i, _ := range clients {
 		wg.Add(1)
-		go func() {
+		go func(i int) {
 			defer wg.Done()
-			c := http.Client{}
-			c.Open(host, port)
-			defer c.Close()
-			results, code := c.Get(t.Route)
+			clients[i].Open(host, port)
+		}(i)
+	}
+	wg.Wait()
+
+	for i, _ := range clients {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			defer clients[i].Close()
+			results, code := clients[i].Get(t.Route)
 			t.Results.Cumulate(results)
 			if code != 200 {
 				t.ErrorRate++
 			}
-		}()
+		}(i)
 	}
 	wg.Wait()
+
 	t.ComputeResult()
 	t.Results.Compute(t.Count)
 }
