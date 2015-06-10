@@ -67,7 +67,7 @@ func (c *Client) Get(route string) (Result, int) {
 	for header != "\n" {
 		parsed := strings.Split(header, ":")
 		if len(parsed) == 2 {
-			headers[parsed[0]] = parsed[1]
+			headers[parsed[0]] = strings.Trim(parsed[1], " ")
 		}
 		header, err = reader.ReadString('\n')
 		if err != nil {
