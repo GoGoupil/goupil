@@ -8,6 +8,7 @@ import (
 	"net/http/httputil"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -57,9 +58,21 @@ func (c *Client) Get(route string) (Result, int) {
 	results.TimeSending = time.Since(startSending).Seconds() * 1000
 	startReading := time.Now()
 	reader := bufio.NewReader((*c.Socket))
-	status, err := reader.ReadString('\n')
+	headers := make(map[string]string)
+	headers["HTTP"], err = reader.ReadString('\n')
+	header, err := reader.ReadString('\n')
 	if err != nil {
 		panic(err)
+	}
+	for header != "\n" {
+		parsed := strings.Split(header, ":")
+		if len(parsed) == 2 {
+			headers[parsed[0]] = parsed[1]
+		}
+		header, err = reader.ReadString('\n')
+		if err != nil {
+			panic(err)
+		}
 	}
 	results.TimeReadingFirstBytes = time.Since(startReading).Seconds() * 1000
 	for ; err != nil; _, err = reader.ReadByte() {
@@ -70,7 +83,7 @@ func (c *Client) Get(route string) (Result, int) {
 
 	// Parse code.
 	re := regexp.MustCompile("HTTP/1.[0-1] ([0-9]{3}).*")
-	submatches := re.FindStringSubmatch(status)
+	submatches := re.FindStringSubmatch(headers["HTTP"])
 	if len(submatches) == 0 {
 		panic("Can't find HTTP response code")
 	}
