@@ -64,10 +64,10 @@ func (c *Client) Get(route string) (Result, int) {
 	if err != nil {
 		panic(err)
 	}
-	for header != "\n" {
+	for header != "\r\n" {
 		parsed := strings.Split(header, ":")
 		if len(parsed) == 2 {
-			headers[parsed[0]] = strings.Trim(parsed[1], " ")
+			headers[parsed[0]] = strings.Trim(parsed[1], "\r\n ")
 		}
 		header, err = reader.ReadString('\n')
 		if err != nil {
@@ -84,6 +84,26 @@ func (c *Client) Get(route string) (Result, int) {
 			_, err = reader.ReadByte()
 			if err != nil {
 				panic(err)
+			}
+		}
+	} else {
+		if val, ok := headers["Transfer-Encoding"]; ok {
+			if val == "chunked" {
+				var data []byte
+				hexSize, _, _ := reader.ReadLine()
+				size, _ := strconv.ParseInt("0x"+string(hexSize), 0, 64)
+				for size > 0 {
+					for i := 0; i < int(size); i++ {
+						bt, err := reader.ReadByte()
+						if err != nil {
+							panic(err)
+						}
+						data = append(data, bt)
+					}
+					hexSize, _, _ := reader.ReadLine()
+					hexSize, _, _ = reader.ReadLine()
+					size, _ = strconv.ParseInt("0x"+string(hexSize), 0, 64)
+				}
 			}
 		}
 	}
