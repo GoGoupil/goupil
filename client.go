@@ -17,6 +17,13 @@ type Client struct {
 	Port   int
 }
 
+type Result struct {
+	TimeSending           float64
+	TimeReadingFirstBytes float64
+	TimeReadingTotal      float64
+	TimeTotal             float64
+}
+
 func (c *Client) Open(host string, port int) {
 	socket, err := net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
@@ -28,7 +35,7 @@ func (c *Client) Open(host string, port int) {
 	c.Port = port
 }
 
-func (c *Client) Get(route string) (float64, int) {
+func (c *Client) Get(route string) (Result, int) {
 	if c.Socket == nil {
 		panic("Socket not opened")
 	}
@@ -44,17 +51,22 @@ func (c *Client) Get(route string) (float64, int) {
 	}
 
 	// Write/Read HTTP request/response.
-	start := time.Now()
+	results := Result{}
+	startSending := time.Now()
 	fmt.Fprintf((*c.Socket), string(dump))
+	results.TimeSending = time.Since(startSending).Seconds() * 1000
+	startReading := time.Now()
 	reader := bufio.NewReader((*c.Socket))
 	status, err := reader.ReadString('\n')
 	if err != nil {
 		panic(err)
 	}
+	results.TimeReadingFirstBytes = time.Since(startReading).Seconds() * 1000
 	for ; err != nil; _, err = reader.ReadByte() {
 		// Read whole response.
 	}
-	elapsed := time.Since(start).Seconds() * 1000
+	results.TimeReadingTotal = time.Since(startReading).Seconds() * 1000
+	results.TimeTotal = time.Since(startSending).Seconds() * 1000
 
 	// Parse code.
 	re := regexp.MustCompile("HTTP/1.[0-1] ([0-9]{3}).*")
@@ -67,7 +79,7 @@ func (c *Client) Get(route string) (float64, int) {
 		panic(err)
 	}
 
-	return elapsed, code
+	return results, code
 }
 
 func (c *Client) Close() {
