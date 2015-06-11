@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/GoGoupil/http"
 	"sync"
 )
 
@@ -19,7 +18,7 @@ type AverageResults struct {
 	AverageTotalTime             float64
 }
 
-func (ar *AverageResults) Cumulate(results http.Result) {
+func (ar *AverageResults) Cumulate(results Result) {
 	ar.AverageSendingTime += results.TimeSending
 	ar.AverageReadingFirstBytesTime += results.TimeReadingFirstBytes
 	ar.AverageReadingTotalTime += results.TimeReadingTotal
@@ -35,7 +34,7 @@ func (ar *AverageResults) Compute(count int) {
 
 func (t *Thread) Run(host string, port int) {
 	wg := sync.WaitGroup{}
-	clients := make([]http.Client, t.Count)
+	clients := make([]Client, t.Count)
 
 	for i, _ := range clients {
 		wg.Add(1)
