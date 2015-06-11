@@ -16,6 +16,8 @@ type AverageResults struct {
 	AverageReadingFirstBytesTime float64
 	AverageReadingTotalTime      float64
 	AverageTotalTime             float64
+	MinTotalTime                 float64
+	MaxTotalTime                 float64
 }
 
 func (ar *AverageResults) Cumulate(results Result) {
@@ -23,6 +25,13 @@ func (ar *AverageResults) Cumulate(results Result) {
 	ar.AverageReadingFirstBytesTime += results.TimeReadingFirstBytes
 	ar.AverageReadingTotalTime += results.TimeReadingTotal
 	ar.AverageTotalTime += results.TimeTotal
+
+	if results.TimeTotal < ar.MinTotalTime || ar.MinTotalTime == 0 {
+		ar.MinTotalTime = results.TimeTotal
+	}
+	if results.TimeTotal > ar.MaxTotalTime || ar.MaxTotalTime == 0 {
+		ar.MaxTotalTime = results.TimeTotal
+	}
 }
 
 func (ar *AverageResults) Compute(count int) {

@@ -54,6 +54,8 @@ func (p *Plan) DisplayResult() {
 		fmt.Printf("Average reading first bytes time: %fms\n", thread.Results.AverageReadingFirstBytesTime)
 		fmt.Printf("Average reading total time: %fms\n", thread.Results.AverageReadingTotalTime)
 		fmt.Printf("Average total time: %fms\n", thread.Results.AverageTotalTime)
+		fmt.Printf("Min total time: %fms\n", thread.Results.MinTotalTime)
+		fmt.Printf("Max total time: %fms\n", thread.Results.MaxTotalTime)
 		fmt.Printf("Error rate: %f%%\n", thread.ErrorRate)
 	}
 	fmt.Println()
