@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"sync"
+	"time"
 )
 
 type Thread struct {
+	Duration  int
+	Gap       int
 	Count     int
 	Route     string
 	Results   AverageResults
@@ -54,24 +58,32 @@ func (t *Thread) Run(host string, port int) {
 	}
 	wg.Wait()
 
-	for i, _ := range clients {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			defer clients[i].Close()
-			results, code := clients[i].Get(t.Route)
-			t.Results.Cumulate(results)
-			if code != 200 {
-				t.ErrorRate++
-			}
-		}(i)
+	reqTotal := t.Count * (t.Duration / t.Gap)
+	for reqCount := 0 ; reqCount < reqTotal ; reqCount += t.Count {
+		fmt.Printf("New wave... (%d/%d requests)\n", (reqCount + t.Count), reqTotal)
+		for i, _ := range clients {
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				results, code := clients[i].Get(t.Route)
+				t.Results.Cumulate(results)
+				if code != 200 {
+					t.ErrorRate++
+				}
+			}(i)
+		}
+		time.Sleep(time.Duration(t.Gap) * time.Millisecond)
+		wg.Wait()
 	}
-	wg.Wait()
+	
+	for i, _ := range clients {
+		clients[i].Close()
+	}
 
 	t.ComputeResult()
-	t.Results.Compute(t.Count)
+	t.Results.Compute(t.Count * (t.Duration / t.Gap))
 }
 
 func (t *Thread) ComputeResult() {
-	t.ErrorRate = (t.ErrorRate * 100) / float64(t.Count)
+	t.ErrorRate = (t.ErrorRate * 100) / float64(t.Count * (t.Duration / t.Gap))
 }
