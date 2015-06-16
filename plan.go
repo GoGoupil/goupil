@@ -35,7 +35,7 @@ func (p *Plan) Run() {
 		wg.Add(1)
 		go func(t *Thread) {
 			defer wg.Done()
-			fmt.Printf("Running %d threads on route %s\n", t.Count, t.Route)
+			fmt.Printf("Running %d threads sending a new request each %dms during %dms on route %s\n", t.Count, t.Gap, t.Duration, t.Route)
 			t.Run(p.Host, p.Port)
 		}(thread)
 	}
