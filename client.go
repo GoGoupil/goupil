@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -30,7 +32,7 @@ func (c *Client) NewClient(host string, port int) {
 	c.Port = port
 }
 
-func (c *Client) Get(route string) (Result, int) {
+func (c *Client) Get(route string, method string, params map[string]string) (Result, int) {
 	// Generate a new socket.
 	socket, err := net.Dial("tcp", fmt.Sprintf("%s:%d", c.Host, c.Port))
 	if err != nil {
@@ -38,8 +40,18 @@ func (c *Client) Get(route string) (Result, int) {
 	}
 	c.Sockets = append(c.Sockets, &socket)
 	
+	if method != "GET" && method != "POST" {
+		panic(fmt.Sprintf("Wrong method %s", method))
+	}
+	
+	// Prepare parameters.
+	data := url.Values{}
+	for key, value := range params {
+		data.Set(key, value)
+	}
+	
 	// Prepare HTTP request.
-	req, err := http.NewRequest("GET", fmt.Sprintf("http://%s%s", c.Host, route), nil)
+	req, err := http.NewRequest(method, fmt.Sprintf("http://%s%s", c.Host, route), bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		panic(err)
 	}
