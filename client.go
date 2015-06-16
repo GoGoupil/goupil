@@ -13,7 +13,7 @@ import (
 )
 
 type Client struct {
-	Socket *net.Conn
+	Sockets []*net.Conn
 	Host   string
 	Port   int
 }
@@ -25,22 +25,19 @@ type Result struct {
 	TimeTotal             float64
 }
 
-func (c *Client) Open(host string, port int) {
-	socket, err := net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
-	if err != nil {
-		panic(err)
-	}
-
-	c.Socket = &socket
+func (c *Client) New(host string, port int) {
 	c.Host = host
 	c.Port = port
 }
 
 func (c *Client) Get(route string) (Result, int) {
-	if c.Socket == nil {
-		panic("Socket not opened")
+	// Generate a new socket.
+	socket, err := net.Dial("tcp", fmt.Sprintf("%s:%d", c.Host, c.Port))
+	if err != nil {
+		panic(err)
 	}
-
+	c.Sockets = append(c.Sockets, &socket)
+	
 	// Prepare HTTP request.
 	req, err := http.NewRequest("GET", fmt.Sprintf("http://%s%s", c.Host, route), nil)
 	if err != nil {
@@ -54,10 +51,10 @@ func (c *Client) Get(route string) (Result, int) {
 	// Write/Read HTTP request/response.
 	results := Result{}
 	startSending := time.Now()
-	fmt.Fprintf((*c.Socket), string(dump))
+	fmt.Fprintf(socket, string(dump))
 	results.TimeSending = time.Since(startSending).Seconds() * 1000
 	startReading := time.Now()
-	reader := bufio.NewReader((*c.Socket))
+	reader := bufio.NewReader(socket)
 	headers := make(map[string]string)
 	headers["HTTP"], err = reader.ReadString('\n')
 	header, err := reader.ReadString('\n')
@@ -114,6 +111,7 @@ func (c *Client) Get(route string) (Result, int) {
 	re := regexp.MustCompile("HTTP/1.[0-1] ([0-9]{3}).*")
 	submatches := re.FindStringSubmatch(headers["HTTP"])
 	if len(submatches) == 0 {
+		fmt.Println(headers)
 		panic("Can't find HTTP response code")
 	}
 	code, err := strconv.Atoi(submatches[1])
@@ -125,5 +123,7 @@ func (c *Client) Get(route string) (Result, int) {
 }
 
 func (c *Client) Close() {
-	(*c.Socket).Close()
+	for i, _ := range c.Sockets {
+		(*c.Sockets[i]).Close()
+	}
 }

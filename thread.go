@@ -53,7 +53,7 @@ func (t *Thread) Run(host string, port int) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			clients[i].Open(host, port)
+			clients[i].New(host, port)
 		}(i)
 	}
 	wg.Wait()
@@ -73,8 +73,9 @@ func (t *Thread) Run(host string, port int) {
 			}(i)
 		}
 		time.Sleep(time.Duration(t.Gap) * time.Millisecond)
-		wg.Wait()
 	}
+	fmt.Println("Done. Waiting for remaining connections to finish... This can take a while according to your web server.")
+	wg.Wait()
 	
 	for i, _ := range clients {
 		clients[i].Close()
