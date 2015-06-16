@@ -53,7 +53,7 @@ func (t *Thread) Run(host string, port int) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			clients[i].New(host, port)
+			clients[i].NewClient(host, port)
 		}(i)
 	}
 	wg.Wait()

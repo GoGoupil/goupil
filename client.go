@@ -25,7 +25,7 @@ type Result struct {
 	TimeTotal             float64
 }
 
-func (c *Client) New(host string, port int) {
+func (c *Client) NewClient(host string, port int) {
 	c.Host = host
 	c.Port = port
 }
