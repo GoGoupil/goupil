@@ -11,6 +11,8 @@ type Thread struct {
 	Gap       int
 	Count     int
 	Route     string
+	Method    string
+	Params    map[string]string
 	Results   AverageResults
 	ErrorRate float64
 }
@@ -65,7 +67,7 @@ func (t *Thread) Run(host string, port int) {
 			wg.Add(1)
 			go func(i int) {
 				defer wg.Done()
-				results, code := clients[i].Get(t.Route)
+				results, code := clients[i].Get(t.Route, t.Method, t.Params)
 				t.Results.Cumulate(results)
 				if code != 200 {
 					t.ErrorRate++
