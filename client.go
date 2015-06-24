@@ -2,22 +2,28 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
 
+// Client struct determining a package of connected sockets
+// having the same configuration.
 type Client struct {
-	Socket *net.Conn
+	Sockets []*net.Conn
 	Host   string
 	Port   int
+	Https  bool
 }
 
+// Result struct containing client computed results.
 type Result struct {
 	TimeSending           float64
 	TimeReadingFirstBytes float64
@@ -25,24 +31,43 @@ type Result struct {
 	TimeTotal             float64
 }
 
-func (c *Client) Open(host string, port int) {
-	socket, err := net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
+// NewClient function initializing a new client.
+func (c *Client) NewClient(host string, port int, https bool) {
+	c.Host = host
+	c.Port = port
+	c.Https = https
+}
+
+// Get function sending an HTTP GET request through the sockets
+// and returning time results and HTTP code.
+// This function manages different type of HTTP response (chunked or not).
+func (c *Client) Get(route string, method string, params map[string]string) (Result, int) {
+	// Generate a new socket.
+	socket, err := net.Dial("tcp", fmt.Sprintf("%s:%d", c.Host, c.Port))
 	if err != nil {
 		panic(err)
 	}
-
-	c.Socket = &socket
-	c.Host = host
-	c.Port = port
-}
-
-func (c *Client) Get(route string) (Result, int) {
-	if c.Socket == nil {
-		panic("Socket not opened")
+	c.Sockets = append(c.Sockets, &socket)
+	
+	if method != "GET" && method != "POST" {
+		panic(fmt.Sprintf("Wrong method %s", method))
+	}
+	
+	// Prepare parameters.
+	data := url.Values{}
+	for key, value := range params {
+		data.Set(key, value)
+	}
+	
+	// Prepare HTTP request.
+	var url string
+	if c.Https {
+		url = fmt.Sprintf("https://%s%s", c.Host, route)
+	} else {
+		fmt.Sprintf("http://%s%s", c.Host, route)
 	}
 
-	// Prepare HTTP request.
-	req, err := http.NewRequest("GET", fmt.Sprintf("http://%s%s", c.Host, route), nil)
+	req, err := http.NewRequest(method, url, bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		panic(err)
 	}
@@ -54,10 +79,10 @@ func (c *Client) Get(route string) (Result, int) {
 	// Write/Read HTTP request/response.
 	results := Result{}
 	startSending := time.Now()
-	fmt.Fprintf((*c.Socket), string(dump))
+	fmt.Fprintf(socket, string(dump))
 	results.TimeSending = time.Since(startSending).Seconds() * 1000
 	startReading := time.Now()
-	reader := bufio.NewReader((*c.Socket))
+	reader := bufio.NewReader(socket)
 	headers := make(map[string]string)
 	headers["HTTP"], err = reader.ReadString('\n')
 	header, err := reader.ReadString('\n')
@@ -114,6 +139,7 @@ func (c *Client) Get(route string) (Result, int) {
 	re := regexp.MustCompile("HTTP/1.[0-1] ([0-9]{3}).*")
 	submatches := re.FindStringSubmatch(headers["HTTP"])
 	if len(submatches) == 0 {
+		fmt.Println(headers)
 		panic("Can't find HTTP response code")
 	}
 	code, err := strconv.Atoi(submatches[1])
@@ -124,6 +150,10 @@ func (c *Client) Get(route string) (Result, int) {
 	return results, code
 }
 
+// Close function to close
+// all sockets.
 func (c *Client) Close() {
-	(*c.Socket).Close()
+	for i, _ := range c.Sockets {
+		(*c.Sockets[i]).Close()
+	}
 }
