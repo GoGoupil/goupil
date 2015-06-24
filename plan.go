@@ -11,6 +11,7 @@ import (
 type Plan struct {
 	Host    string
 	Port    int
+	Https   bool
 	Threads []*Thread
 }
 
@@ -36,7 +37,7 @@ func (p *Plan) Run() {
 		go func(t *Thread) {
 			defer wg.Done()
 			fmt.Printf("Running %d threads sending a new request each %dms during %dms on route %s\n", t.Count, t.Gap, t.Duration, t.Route)
-			t.Run(p.Host, p.Port)
+			t.Run(p.Host, p.Port, p.Https)
 		}(thread)
 	}
 	wg.Wait()
