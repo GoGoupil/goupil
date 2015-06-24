@@ -47,7 +47,7 @@ func (ar *AverageResults) Compute(count int) {
 	ar.AverageTotalTime /= float64(count)
 }
 
-func (t *Thread) Run(host string, port int) {
+func (t *Thread) Run(host string, port int, https bool) {
 	wg := sync.WaitGroup{}
 	clients := make([]Client, t.Count)
 
@@ -55,7 +55,7 @@ func (t *Thread) Run(host string, port int) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			clients[i].NewClient(host, port)
+			clients[i].NewClient(host, port, https)
 		}(i)
 	}
 	wg.Wait()
