@@ -6,18 +6,18 @@ This is a JSON plan description example.
 
 ```json
 {
-    "Host": "devatoria.info",
-    "Port": 80,
-    "Threads": [
-        {
-            "Count": 10,
-            "Route": "/"
-        },
+	"Host": "www.facebook.com",
+	"Port": 80,
+	"Https": true,
+	"Threads": [
 		{
-		    "Count": 10,
-		    "Route": "/test"
+			"Duration": 100,
+			"Gap": 100,
+			"Count": 1,
+			"Route": "/",
+			"Method": "GET"
 		}
-    ]
+	]
 }
 ```
 
