@@ -71,7 +71,7 @@ func (t *Thread) Run(host string, port int, https bool) {
 	wg.Wait()
 
 	reqTotal := t.Count * (t.Duration / t.Gap)
-	for reqCount := 0 ; reqCount < reqTotal ; reqCount += t.Count {
+	for reqCount := 0; reqCount < reqTotal; reqCount += t.Count {
 		fmt.Printf("New wave... (%d/%d requests)\n", (reqCount + t.Count), reqTotal)
 		for i, _ := range clients {
 			wg.Add(1)
@@ -88,7 +88,7 @@ func (t *Thread) Run(host string, port int, https bool) {
 	}
 	fmt.Println("Done. Waiting for remaining connections to finish... This can take a while according to your web server.")
 	wg.Wait()
-	
+
 	for i, _ := range clients {
 		clients[i].Close()
 	}
@@ -100,5 +100,5 @@ func (t *Thread) Run(host string, port int, https bool) {
 // ComputeResult function computing
 // error rate.
 func (t *Thread) ComputeResult() {
-	t.ErrorRate = (t.ErrorRate * 100) / float64(t.Count * (t.Duration / t.Gap))
+	t.ErrorRate = (t.ErrorRate * 100) / float64(t.Count*(t.Duration/t.Gap))
 }

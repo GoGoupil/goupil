@@ -18,9 +18,9 @@ import (
 // having the same configuration.
 type Client struct {
 	Sockets []*net.Conn
-	Host   string
-	Port   int
-	Https  bool
+	Host    string
+	Port    int
+	Https   bool
 }
 
 // Result struct containing client computed results.
@@ -48,17 +48,17 @@ func (c *Client) Get(route string, method string, params map[string]string) (Res
 		panic(err)
 	}
 	c.Sockets = append(c.Sockets, &socket)
-	
+
 	if method != "GET" && method != "POST" {
 		panic(fmt.Sprintf("Wrong method %s", method))
 	}
-	
+
 	// Prepare parameters.
 	data := url.Values{}
 	for key, value := range params {
 		data.Set(key, value)
 	}
-	
+
 	// Prepare HTTP request.
 	var url string
 	if c.Https {
