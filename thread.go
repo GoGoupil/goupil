@@ -69,7 +69,7 @@ func (t *Thread) Run(host string, port int) {
 				defer wg.Done()
 				results, code := clients[i].Get(t.Route, t.Method, t.Params)
 				t.Results.Cumulate(results)
-				if code != 200 {
+				if code != 200 && code != 302 {
 					t.ErrorRate++
 				}
 			}(i)
