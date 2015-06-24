@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+// Thread structure defining a connected thread
+// that will send [count] requests [method] HTTP request with [params],
+// each [gap]ms during [duration]ms to [route] and compute
+// time results in ms and error rate in percent.
 type Thread struct {
 	Duration  int
 	Gap       int
@@ -17,6 +21,8 @@ type Thread struct {
 	ErrorRate float64
 }
 
+// AverageResults structure defining
+// a set of results for the current thread.
 type AverageResults struct {
 	AverageSendingTime           float64
 	AverageReadingFirstBytesTime float64
@@ -26,6 +32,7 @@ type AverageResults struct {
 	MaxTotalTime                 float64
 }
 
+// Cumulate function updating results.
 func (ar *AverageResults) Cumulate(results Result) {
 	ar.AverageSendingTime += results.TimeSending
 	ar.AverageReadingFirstBytesTime += results.TimeReadingFirstBytes
@@ -40,6 +47,8 @@ func (ar *AverageResults) Cumulate(results Result) {
 	}
 }
 
+// Compute function computing average results
+// at the end of thread execution.
 func (ar *AverageResults) Compute(count int) {
 	ar.AverageSendingTime /= float64(count)
 	ar.AverageReadingFirstBytesTime /= float64(count)
@@ -47,6 +56,7 @@ func (ar *AverageResults) Compute(count int) {
 	ar.AverageTotalTime /= float64(count)
 }
 
+// Run function sending requests through different goroutine.
 func (t *Thread) Run(host string, port int, https bool) {
 	wg := sync.WaitGroup{}
 	clients := make([]Client, t.Count)
@@ -87,6 +97,8 @@ func (t *Thread) Run(host string, port int, https bool) {
 	t.Results.Compute(t.Count * (t.Duration / t.Gap))
 }
 
+// ComputeResult function computing
+// error rate.
 func (t *Thread) ComputeResult() {
 	t.ErrorRate = (t.ErrorRate * 100) / float64(t.Count * (t.Duration / t.Gap))
 }

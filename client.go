@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+// Client struct determining a package of connected sockets
+// having the same configuration.
 type Client struct {
 	Sockets []*net.Conn
 	Host   string
@@ -21,6 +23,7 @@ type Client struct {
 	Https  bool
 }
 
+// Result struct containing client computed results.
 type Result struct {
 	TimeSending           float64
 	TimeReadingFirstBytes float64
@@ -28,12 +31,16 @@ type Result struct {
 	TimeTotal             float64
 }
 
+// NewClient function initializing a new client.
 func (c *Client) NewClient(host string, port int, https bool) {
 	c.Host = host
 	c.Port = port
 	c.Https = https
 }
 
+// Get function sending an HTTP GET request through the sockets
+// and returning time results and HTTP code.
+// This function manages different type of HTTP response (chunked or not).
 func (c *Client) Get(route string, method string, params map[string]string) (Result, int) {
 	// Generate a new socket.
 	socket, err := net.Dial("tcp", fmt.Sprintf("%s:%d", c.Host, c.Port))
@@ -143,6 +150,8 @@ func (c *Client) Get(route string, method string, params map[string]string) (Res
 	return results, code
 }
 
+// Close function to close
+// all sockets.
 func (c *Client) Close() {
 	for i, _ := range c.Sockets {
 		(*c.Sockets[i]).Close()
