@@ -20,3 +20,21 @@ This is a JSON plan description example.
     ]
 }
 ```
+
+# Increase "Open files" limit
+Goupil must open a lot of sockets (and files) to run load tests. There are chances that you will hit max open files limit allowed by linux. To avoid this problem, you should increase this limit.
+
+Edit `/etc/security/limits.conf` file and add the following lines at the end, then logout and login again.
+
+```
+*         hard    nofile      999999
+*         soft    nofile      999999
+root      hard    nofile      999999
+root      soft    nofile      999999
+```
+
+## Remember
+Goupil should be used on testing machines only and not on production servers or other critical machines. So, you must be sure that editing this configuration will not affect your machine security!
+
+## Also
+Thank you to https://rtcamp.com/tutorials/linux/increase-open-files-limit/ for this trick ;)
