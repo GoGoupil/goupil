@@ -8,6 +8,8 @@ import (
 	"sync"
 )
 
+// Plan structure defining an execution plan
+// constitued of host, port, protocol and a set of threads.
 type Plan struct {
 	Host    string
 	Port    int
@@ -15,6 +17,7 @@ type Plan struct {
 	Threads []*Thread
 }
 
+// Load function loading JSON file to create the structure.
 func (p *Plan) Load(path string) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -29,6 +32,7 @@ func (p *Plan) Load(path string) {
 	p.Run()
 }
 
+// Run function running all threads.
 func (p *Plan) Run() {
 	fmt.Printf("Running plan on %s:%d\n", p.Host, p.Port)
 	wg := sync.WaitGroup{}
@@ -45,6 +49,8 @@ func (p *Plan) Run() {
 	p.DisplayResult()
 }
 
+// DisplayResult function synthetizing the results
+// to display them to user.
 func (p *Plan) DisplayResult() {
 	fmt.Println()
 	fmt.Printf("Results:\n")
