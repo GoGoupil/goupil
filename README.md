@@ -1,3 +1,5 @@
+**DEPRECATED: WILL BE REMOVED SOON, AND REPLACED BY A NEW TOOL USING HTTPTRACE FROM GO 1.7**
+
 # Goupil
 Goupil is a Go HTTP load testing tool allowing you to test your web servers loading capacity. You can check some values like the average response time of the server or the error rate. For more details, read the documentation on http://goupil.devatoria.ovh.
 
